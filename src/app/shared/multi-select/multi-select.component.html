@@ -1,0 +1,26 @@
+<div class="multi-select dense-4">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="">
+        <mat-select
+            [formControl]="inputMultiCtrl"
+            placeholder="Select Inputs"
+            [multiple]="true"
+            #multiSelect
+        >
+            <mat-option>
+                <ngx-mat-select-search
+                    [showToggleAllCheckbox]="true"
+                    (toggleAll)="toggleSelectAll($event)"
+                    [formControl]="inputMultiFilterCtrl"
+                    [toggleAllCheckboxTooltipMessage]="tooltipMessage"
+                    [toggleAllCheckboxTooltipPosition]="'above'"
+                    [placeholderLabel]="'Search for input'"
+                    [noEntriesFoundLabel]="'No Inputs Found'"
+                    [toggleAllCheckboxChecked]="checkBoxChecked"
+                ></ngx-mat-select-search>
+            </mat-option>
+            @for (input of (filteredInputsMulti | async); track $index) {
+            <mat-option [value]="input"> {{ input.inputName }} </mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+</div>

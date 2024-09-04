@@ -1,0 +1,51 @@
+<h1 mat-dialog-title>Connect to Local Server</h1>
+<div mat-dialog-content>
+    <div class="p-2">
+        <p>
+            It doesnt look like your connected to a server. Enter your server
+            address below!
+        </p>
+        <mat-form-field appearance="outline" class="full-width pt-2">
+            <mat-label>Server Address</mat-label>
+            <input
+                matInput
+                [formControl]="serverAddressControl"
+                placeholder="http://localhost:3000"
+            />
+        </mat-form-field>
+        <mat-expansion-panel class="mb-5">
+            <mat-expansion-panel-header>
+                <mat-panel-title>Need help?</mat-panel-title>
+            </mat-expansion-panel-header>
+            <p>
+                The server is the app that is running locally on the PC where
+                OBS is installed.
+            </p>
+            <p>
+                If you are unsure what this means, feel free to shoot me an
+                email at
+                <a href="mailto:henley.austin@gmail.com"
+                    >henley.austin&#64;gmail.com</a
+                >.
+            </p>
+        </mat-expansion-panel>
+    </div>
+</div>
+<div mat-dialog-actions align="end">
+    <div
+        [matTooltip]="
+            serverAddressControl.invalid
+                ? 'Enter a valid address to continue'
+                : ''
+        "
+    >
+        <button
+            mat-raised-button
+            color="primary"
+            (click)="submit()"
+            [disabled]="serverAddressControl.invalid"
+        >
+            Connect
+        </button>
+    </div>
+</div>

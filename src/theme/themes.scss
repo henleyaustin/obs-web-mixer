@@ -1,0 +1,27 @@
+@use '@angular/material' as mat;
+@use '@angular/material/core/theming/_palettes.scss';
+
+$light-theme: mat.define-theme(
+    (
+        color: (
+            theme-type: light,
+            primary: palettes.$rose-palette,
+            tertiary: palettes.$red-palette
+        ),
+        density: (
+            scale: 0
+        )
+    )
+);
+$dark-theme: mat.define-theme(
+    (
+        color: (
+            theme-type: dark,
+            primary: palettes.$cyan-palette,
+            tertiary: palettes.$orange-palette
+        ),
+        density: (
+            scale: 0
+        )
+    )
+);

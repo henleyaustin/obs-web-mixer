@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use './theme/themes.scss';
+@use './theme/material-styles.scss' as style;
+
+@import './theme/utilities.scss';
+@include mat.core();
+
+html,
+body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+
+    &.light-theme {
+        @include mat.core-theme(themes.$light-theme);
+        @include mat.all-component-themes(themes.$light-theme);
+        @include style.style-theme(themes.$light-theme);
+        @include mat.color-variants-backwards-compatibility(
+            themes.$light-theme
+        );
+    }
+
+    &.dark-theme {
+        @include mat.core-theme(themes.$dark-theme);
+        @include mat.all-component-themes(themes.$dark-theme);
+        @include style.style-theme(themes.$dark-theme);
+        @include mat.color-variants-backwards-compatibility(themes.$dark-theme);
+    }
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.full-width {
+    width: 100%;
+}

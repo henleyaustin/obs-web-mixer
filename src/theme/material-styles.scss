@@ -1,0 +1,207 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use './themes.scss';
+
+// Define mixin to generate your custom classes
+@mixin style-theme($theme) {
+    // Extracting colors using Material 3 APIs
+    $primary: mat.get-theme-color($theme, primary);
+    $secondary: mat.get-theme-color($theme, secondary);
+    $tertiary: mat.get-theme-color($theme, tertiary);
+    $warn: mat.get-theme-color($theme, error);
+    $background: mat.get-theme-color($theme, surface);
+    $foreground: mat.get-theme-color($theme, on-surface);
+    $surface-variant: mat.get-theme-color($theme, surface-variant);
+    $on-primary: mat.get-theme-color($theme, on-primary);
+    $on-secondary: mat.get-theme-color($theme, on-secondary);
+    $on-tertiary: mat.get-theme-color($theme, on-tertiary);
+    $on-warn: mat.get-theme-color($theme, on-error);
+    $outline: mat.get-theme-color($theme, outline);
+    $inverse-surface: mat.get-theme-color($theme, inverse-surface);
+    $inverse-on-surface: mat.get-theme-color($theme, inverse-on-surface);
+
+    // Custom color classes
+    .color-primary {
+        color: $primary;
+    }
+
+    .color-secondary {
+        color: $secondary;
+    }
+
+    .color-tertiary {
+        color: $tertiary;
+    }
+
+    .color-warn {
+        color: $warn;
+    }
+
+    .color-outline {
+        color: $outline;
+    }
+
+    // Custom background classes
+    .background-primary {
+        background-color: $primary;
+        color: $on-primary;
+    }
+
+    .background-secondary {
+        background-color: $secondary;
+        color: $on-secondary;
+    }
+
+    .background-tertiary {
+        background-color: $tertiary;
+        color: $on-tertiary;
+    }
+
+    .background-warn {
+        background-color: $warn;
+        color: $on-warn;
+    }
+
+    .background-surface {
+        background-color: $background;
+        color: $foreground;
+    }
+
+    .background-surface-variant {
+        background-color: $surface-variant;
+        color: mat.get-theme-color($theme, on-surface-variant);
+    }
+
+    .background-inverse-surface {
+        background-color: $inverse-surface;
+        color: $inverse-on-surface;
+    }
+
+    // Border and outline classes
+    .border-outline {
+        border: 1px solid $outline;
+    }
+
+    .border-primary {
+        border: 1px solid $primary;
+    }
+
+    .border-secondary {
+        border: 1px solid $secondary;
+    }
+
+    .border-tertiary {
+        border: 1px solid $tertiary;
+    }
+
+    // Text and fill styles
+    code.snippet,
+    a.link {
+        color: $primary;
+    }
+
+    code.snippet-alt,
+    a.link:visited {
+        color: $secondary;
+    }
+
+    .text-on-primary {
+        color: $on-primary;
+    }
+
+    .text-on-secondary {
+        color: $on-secondary;
+    }
+
+    .text-on-tertiary {
+        color: $on-tertiary;
+    }
+
+    .text-on-warn {
+        color: $on-warn;
+    }
+
+    .text-on-surface {
+        color: $foreground;
+    }
+
+    .text-outline {
+        color: $outline;
+    }
+
+    text {
+        fill: $foreground;
+    }
+
+    // Sidebar and navigation styles
+    sidepanel mat-nav-list.mat-nav-list {
+        padding-top: 0px;
+        background-color: $surface-variant;
+    }
+
+    mat-paginator.mat-paginator {
+        background-color: $background;
+    }
+
+    a.mat-list-item.active,
+    a.mat-tab-link.active {
+        color: $primary;
+    }
+
+    // Button styles
+    .button-primary {
+        background-color: $primary;
+        color: $on-primary;
+    }
+
+    .button-secondary {
+        background-color: $secondary;
+        color: $on-secondary;
+    }
+
+    .button-tertiary {
+        background-color: $tertiary;
+        color: $on-tertiary;
+    }
+
+    .button-warn {
+        background-color: $warn;
+        color: $on-warn;
+    }
+
+    // Badge and chip styles
+    .badge-primary {
+        background-color: $primary;
+        color: $on-primary;
+    }
+
+    .badge-secondary {
+        background-color: $secondary;
+        color: $on-secondary;
+    }
+
+    .badge-tertiary {
+        background-color: $tertiary;
+        color: $on-tertiary;
+    }
+
+    .badge-warn {
+        background-color: $warn;
+        color: $on-warn;
+    }
+
+    .dense-1 {
+        @include mat.all-component-densities(-1);
+    }
+
+    .dense-2 {
+        @include mat.all-component-densities(-2);
+    }
+
+    .dense-3 {
+        @include mat.all-component-densities(-3);
+    }
+    .dense-4 {
+        @include mat.all-component-densities(-4);
+    }
+}
