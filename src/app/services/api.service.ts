@@ -14,7 +14,7 @@ export class ApiService {
     // Method to set the baseUrl and test the connection
     setBaseUrl (newBaseUrl: string): Observable<boolean> {
         this.baseUrl = newBaseUrl;
-        return this.http.get<Object>(`${this.baseUrl}/health-check`).pipe(
+        return this.http.get<Object>(`${this.baseUrl}/health`).pipe(
             // If the health check API call is successful, return true
             map(() => true),
             // If it fails, return false
@@ -27,7 +27,7 @@ export class ApiService {
 
     // Fetch audio inputs
     getAudioInputs (): Observable<AudioInput[]> {
-        return this.http.get<AudioInput[]>(`${this.baseUrl}/inputs`);
+        return this.http.get<AudioInput[]>(`${this.baseUrl}/obs/allinputs`);
     }
 
     // Update audio input volume
@@ -36,6 +36,6 @@ export class ApiService {
         inputVolumeMul: number
     ): Observable<any> {
         const body = { inputUuid, inputVolumeMul };
-        return this.http.post(`${this.baseUrl}/input`, body);
+        return this.http.post(`${this.baseUrl}/obs/input`, body);
     }
 }

@@ -16,6 +16,7 @@ import { AudioInputsService } from './services/audio-inputs.service';
 import { ServerConnectionDialogComponent } from './dialogs/server-connection-dialog/server-connection-dialog.component';
 import { ObsConnectionDialogComponent } from './dialogs/obs-connection-dialog/obs-connection-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ApiService } from './services/api.service';
 
 @Component({
     selector: 'app-root',
@@ -39,6 +40,7 @@ export class AppComponent implements OnInit {
     private renderer = inject(Renderer2);
     private dialog = inject(MatDialog);
     private inputService = inject(AudioInputsService);
+    private apiService = inject(ApiService)
 
     title = 'OBS Web Mixer';
 
@@ -62,22 +64,20 @@ export class AppComponent implements OnInit {
             disableClose: true // Prevents closing the dialog without input
         });
 
-        dialogRef.afterClosed().subscribe(serverAddress => {
+        dialogRef.afterClosed().subscribe(async serverAddress => {
             if (serverAddress) {
-                this.openObsConnectionDialog(); // Open the OBS dialog after getting a valid server address
-            }
-        });
-    }
+                this.apiService.setBaseUrl(serverAddress).subscribe({
+                    next: () => {
+                        console.log('Successfuly connected!!');
+                        this.inputService.fetchInputs();
+                    },
+                    error: () => {
+                        console.log('Failed to connect!');
+                        this.openServerConnectionDialog();
+                    }
+                }
 
-    openObsConnectionDialog (): void {
-        const dialogRef = this.dialog.open(ObsConnectionDialogComponent, {
-            disableClose: true // Prevents closing the dialog without input
-        });
-
-        dialogRef.afterClosed().subscribe(obsConnection => {
-            if (obsConnection) {
-                // Handle OBS connection details here (e.g., connect to OBS)
-                console.log('OBS Connection:', obsConnection);
+                )
             }
         });
     }
