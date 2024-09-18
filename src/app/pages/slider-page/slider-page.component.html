@@ -8,27 +8,13 @@
         cdkDropListOrientation="mixed"
         (cdkDropListDropped)="drop($event)"
     >
-        @for (slider of getItemsForCurrentPage(); track slider.inputUuid) {
+        @for (slider of getItemsForCurrentPage(); track slider.uuid) {
         <div class="slider" cdkDrag>
-            <div *cdkDragPlaceholder></div>
-            <mat-card appearance="outlined" class="">
-                <div class="slider-option">
-                    <button mat-icon-button (click)="removeOption(slider.inputUuid)">
-                        <mat-icon>remove</mat-icon>
-                    </button>
-                    <mat-icon class="grab" cdkDragHandle
-                        >drag_indicator</mat-icon
-                    >
-                    <!-- <div class="handle" cdkDragHandle>:::</div> -->
-                </div>
-                <mat-card-content
-                    ><label for="{{ slider.inputUuid }}">{{
-                        slider.inputName
-                    }}</label>
-                    <mat-slider id="{{ slider.inputUuid }}" [discrete]="true">
-                        <input matSliderThumb /> </mat-slider
-                ></mat-card-content>
-            </mat-card>
+            <slider-card
+                [slider]="slider"
+                (remove)="removeOption(slider.uuid)"
+                (newVolume)="changeVolume(slider.uuid, $event)"
+            ></slider-card>
         </div>
         }
     </div>

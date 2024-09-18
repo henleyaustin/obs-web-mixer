@@ -1,0 +1,26 @@
+mat-card {
+    position: relative;
+    padding: 20px;
+
+    .slider-option {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        top: 5px;
+        right: 10px;
+    }
+
+    mat-card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .grab {
+        cursor: grab;
+    }
+}
+
+#stage {
+    image-rendering: pixelated;
+}

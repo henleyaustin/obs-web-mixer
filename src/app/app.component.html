@@ -14,5 +14,7 @@
     </div>
 </mat-toolbar>
 <div class="router">
-    <router-outlet></router-outlet>
+    @if (loaded) {
+    <app-slider-page></app-slider-page>
+    }
 </div>

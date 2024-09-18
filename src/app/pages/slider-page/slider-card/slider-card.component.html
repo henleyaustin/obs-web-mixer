@@ -1,0 +1,35 @@
+<!-- <mat-card appearance="outlined" class="">
+    <div class="slider-option">
+        <button mat-icon-button (click)="onRemove()">
+            <mat-icon>remove</mat-icon>
+        </button>
+        <mat-icon class="grab" cdkDragHandle>drag_indicator</mat-icon>
+    </div>
+    <mat-card-content
+        ><label for="{{ slider.inputUuid }}">{{ slider.inputName }}</label>
+        <mat-slider id="{{ slider.inputUuid }}" [discrete]="true">
+            <input matSliderThumb />
+        </mat-slider>
+    </mat-card-content>
+</mat-card> -->
+
+<div *cdkDragPlaceholder></div>
+<mat-card appearance="outlined" class="">
+    <div class="slider-option">
+        <button mat-icon-button (click)="onRemove()">
+            <mat-icon>remove</mat-icon>
+        </button>
+        <mat-icon class="grab" cdkDragHandle>drag_indicator</mat-icon>
+    </div>
+    <mat-card-content
+        ><label for="{{ slider.uuid }}">{{ slider.name }}</label>
+        <mat-slider id="{{ slider.uuid }}" [discrete]="true">
+            <input
+                matSliderThumb
+                [(ngModel)]="volume"
+                (ngModelChange)="changeVolume($event)"
+            />
+        </mat-slider>
+        <canvas #stage></canvas>
+    </mat-card-content>
+</mat-card>

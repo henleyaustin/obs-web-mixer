@@ -12,7 +12,7 @@
 
     display: grid;
     grid-template-columns: repeat(2, 1fr); /* Two columns */
-    grid-auto-rows: 150px; /* Fixed height for each row */
+    grid-auto-rows: 200px; /* Fixed height for each row */
     grid-auto-flow: row dense; /* Fill rows before moving to the next column */
     width: 100vw; /* Each page should fill the viewport width */
     height: 100%; /* Height based on rows and gaps */
@@ -42,23 +42,6 @@
     position: fixed;
     right: 5px;
     bottom: 50vh;
-}
-
-mat-card {
-    position: relative;
-    padding: 20px;
-
-    .slider-option {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        top: 5px;
-        right: 10px;
-    }
-
-    .grab {
-        cursor: grab;
-    }
 }
 
 @media (max-width: 768px) {

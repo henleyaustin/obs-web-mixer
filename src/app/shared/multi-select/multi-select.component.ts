@@ -1,7 +1,6 @@
 import {
     AfterViewInit,
     Component,
-    effect,
     inject,
     OnInit,
     ViewChild
@@ -10,18 +9,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import {
-    Observable,
-    startWith,
-    map,
-    ReplaySubject,
-    Subject,
-    takeUntil,
-    take
-} from 'rxjs';
-import { AudioInput, AUDIOINPUTS } from '../../../_models/AudioInput';
+import { ReplaySubject, Subject, takeUntil, take } from 'rxjs';
+import { AudioInput } from '../../../_models/AudioInput';
 import { AsyncPipe } from '@angular/common';
 import { AudioInputsService } from '../../services/audio-inputs.service';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
     selector: 'multi-select',
@@ -34,12 +26,15 @@ import { AudioInputsService } from '../../services/audio-inputs.service';
         AsyncPipe
     ],
     templateUrl: './multi-select.component.html',
-    styleUrl: './multi-select.component.scss'
+    styleUrls: ['./multi-select.component.scss']
 })
 export class MultiSelectComponent implements OnInit, AfterViewInit {
     inputService = inject(AudioInputsService);
+    storageService = inject(StorageService);
 
-    /** control for the selected bank for multi-selection */
+    selectedKey: string = 'SELECTED_INPUTS';
+
+    /** control for the selected inputs for multi-selection */
     public inputMultiCtrl: FormControl<AudioInput[]> = new FormControl<
         AudioInput[]
     >([], { nonNullable: true });
@@ -59,56 +54,59 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
 
     @ViewChild('multiSelect', { static: true }) multiSelect!: MatSelect;
 
-    /** Subject that emits when the component has been destroyed. */
     protected _onDestroy = new Subject<void>();
 
     checkBoxChecked = false;
 
-    constructor () {
-        effect(() => {
-            var currentState = this.inputService.selectedInputs();
+    ngOnInit (): void {
+        this.inputService.inputs.subscribe(inputs => {
+            this.filteredInputsMulti.next(inputs);
+        });
+
+        this.inputService.selectedInputs.subscribe(currentState => {
             if (currentState !== this.inputMultiCtrl.value) {
                 this.inputMultiCtrl.patchValue(currentState);
-                if (currentState.length == 0) this.checkBoxChecked = false;
+                if (currentState.length === 0) {
+                    this.checkBoxChecked = false;
+                }
             }
         });
-    }
 
-    ngOnInit () {
-        // set initial selection
-        this.inputMultiCtrl.setValue([]);
-
-        // load the initial input list
-        this.filteredInputsMulti.next(this.inputService.inputs());
-
-        // listen for search field value changes
+        // Listen for changes in the search field and filter the inputs
         this.inputMultiFilterCtrl.valueChanges
             .pipe(takeUntil(this._onDestroy))
             .subscribe(() => {
                 this.filterInputsMulti();
             });
 
-        this.inputMultiCtrl.valueChanges.subscribe(value => {
-            this.inputService.selectedInputs.set(value);
+        // Update the selected inputs when the form control value changes
+        this.inputMultiCtrl.valueChanges.subscribe(items => {
+            this.storageService.setSessionItem(this.selectedKey, items);
+            this.inputService.selectedInputs.next(items);
         });
+
+        const cache = this.storageService.getSessionItem(
+            this.selectedKey
+        ) as AudioInput[];
+        if (cache) this.inputMultiCtrl.patchValue(cache);
     }
 
-    ngAfterViewInit () {
+    ngAfterViewInit (): void {
         this.setInitialValue();
     }
 
-    ngOnDestroy () {
+    ngOnDestroy (): void {
         this._onDestroy.next();
         this._onDestroy.complete();
     }
 
-    toggleSelectAll (selectAllValue: boolean) {
+    toggleSelectAll (selectAllValue: boolean): void {
         this.filteredInputsMulti
             .pipe(take(1), takeUntil(this._onDestroy))
             .subscribe(() => {
                 if (selectAllValue) {
                     this.inputMultiCtrl.patchValue([
-                        ...this.inputService.inputs()
+                        ...this.inputService.inputs.value
                     ]);
                     this.checkBoxChecked = true;
                 } else {
@@ -119,37 +117,35 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
     }
 
     /**
-     * Sets the initial value after the filteredBanks are loaded initially
+     * Sets the initial value after the filtered inputs are loaded initially
      */
-    protected setInitialValue () {
+    protected setInitialValue (): void {
         this.filteredInputsMulti
             .pipe(take(1), takeUntil(this._onDestroy))
             .subscribe(() => {
                 this.multiSelect.compareWith = (a: AudioInput, b: AudioInput) =>
-                    a && b && a.inputUuid === b.inputUuid;
+                    a && b && a.uuid === b.uuid;
             });
     }
 
-    protected filterInputsMulti () {
-        if (!!!this.inputService.inputs().length) {
+    protected filterInputsMulti (): void {
+        const inputs = this.inputService.inputs.value;
+        if (!inputs.length) {
             return;
         }
-        // get the search keyword
+
         let search = this.inputMultiFilterCtrl.value;
         if (!search) {
-            this.filteredInputsMulti.next(this.inputService.inputs().slice());
+            this.filteredInputsMulti.next(inputs.slice());
             return;
         } else {
             search = search.toLowerCase();
         }
-        // filter the banks
-        this.filteredInputsMulti.next(
-            this.inputService
-                .inputs()
-                .filter(
-                    inputs =>
-                        inputs.inputName.toLowerCase().indexOf(search) > -1
-                )
+
+        const filteredInputs = inputs.filter(input =>
+            input.name.toLowerCase().includes(search)
         );
+
+        this.filteredInputsMulti.next(filteredInputs);
     }
 }

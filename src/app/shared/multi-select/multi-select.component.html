@@ -19,7 +19,7 @@
                 ></ngx-mat-select-search>
             </mat-option>
             @for (input of (filteredInputsMulti | async); track $index) {
-            <mat-option [value]="input"> {{ input.inputName }} </mat-option>
+            <mat-option [value]="input"> {{ input.name }} </mat-option>
             }
         </mat-select>
     </mat-form-field>
