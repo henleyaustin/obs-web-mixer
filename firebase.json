@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "dist/obs-web-mixer/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
