@@ -1,35 +1,12 @@
-.container {
-    display: flex;
-    padding-top: 20px;
-    overflow-x: scroll;
-    height: 100%;
-    width: 100%;
-    scroll-snap-type: x mandatory;
-}
-
 .page {
-    flex-shrink: 0;
-
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns */
-    grid-auto-rows: 200px; /* Fixed height for each row */
-    grid-auto-flow: row dense; /* Fill rows before moving to the next column */
-    width: 100vw; /* Each page should fill the viewport width */
-    height: 100%; /* Height based on rows and gaps */
-    scroll-snap-align: start;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    width: 100vw;
+    padding: 10px;
     box-sizing: border-box;
-    padding: 20px;
-    overflow: hidden; /* Prevent vertical scrolling */
-}
-
-.slider {
-    margin: auto;
-    width: 85%;
-    height: 100%; /* Take full height of the grid cell */
-
-    mat-slider {
-        width: 100%;
-    }
+    overflow: hidden;
 }
 
 .prev-page-button {
@@ -44,9 +21,54 @@
     bottom: 50vh;
 }
 
+.full-window {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    scroll-snap-type: x mandatory;
+}
+
+/* 2xl */
+@media (max-width: 1536px) {
+}
+
+/* xl */
+@media (max-width: 1280px) {
+}
+
+/* lg */
+@media (max-width: 1024px) {
+}
+
+/* md */
 @media (max-width: 768px) {
     .page {
-        grid-template-columns: 1fr; /* Single column on small screens */
-        grid-auto-rows: 120px; /* Adjust rows for single column layout */
+        padding: 40px;
     }
+
+    .slider {
+        width: 80vw;
+    }
+
+    .container {
+        padding-top: 1.5rem;
+    }
+
+    .prev-page-button {
+        left: 1px;
+    }
+
+    .next-page-button {
+        right: 1px;
+    }
+}
+
+/* sm */
+@media (max-width: 640px) {
+}
+
+/* xs */
+@media (max-width: 475px) {
 }

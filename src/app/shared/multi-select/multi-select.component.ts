@@ -14,6 +14,7 @@ import { AudioInput } from '../../../_models/AudioInput';
 import { AsyncPipe } from '@angular/common';
 import { AudioInputsService } from '../../services/audio-inputs.service';
 import { StorageService } from '../../services/storage.service';
+import { OBSService } from '../../services/obs.service';
 
 @Component({
     selector: 'multi-select',
@@ -29,7 +30,8 @@ import { StorageService } from '../../services/storage.service';
     styleUrls: ['./multi-select.component.scss']
 })
 export class MultiSelectComponent implements OnInit, AfterViewInit {
-    inputService = inject(AudioInputsService);
+    // inputService = inject(AudioInputsService);
+    obsService = inject(OBSService);
     storageService = inject(StorageService);
 
     selectedKey: string = 'SELECTED_INPUTS';
@@ -58,12 +60,12 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
 
     checkBoxChecked = false;
 
-    ngOnInit (): void {
-        this.inputService.inputs.subscribe(inputs => {
+    ngOnInit(): void {
+        this.obsService.inputs$.subscribe((inputs) => {
             this.filteredInputsMulti.next(inputs);
         });
 
-        this.inputService.selectedInputs.subscribe(currentState => {
+        this.obsService.selectedInputs$.subscribe((currentState) => {
             if (currentState !== this.inputMultiCtrl.value) {
                 this.inputMultiCtrl.patchValue(currentState);
                 if (currentState.length === 0) {
@@ -80,9 +82,9 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
             });
 
         // Update the selected inputs when the form control value changes
-        this.inputMultiCtrl.valueChanges.subscribe(items => {
+        this.inputMultiCtrl.valueChanges.subscribe((items) => {
             this.storageService.setSessionItem(this.selectedKey, items);
-            this.inputService.selectedInputs.next(items);
+            this.obsService.selectedInputs$.next(items);
         });
 
         const cache = this.storageService.getSessionItem(
@@ -91,22 +93,22 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
         if (cache) this.inputMultiCtrl.patchValue(cache);
     }
 
-    ngAfterViewInit (): void {
+    ngAfterViewInit(): void {
         this.setInitialValue();
     }
 
-    ngOnDestroy (): void {
+    ngOnDestroy(): void {
         this._onDestroy.next();
         this._onDestroy.complete();
     }
 
-    toggleSelectAll (selectAllValue: boolean): void {
+    toggleSelectAll(selectAllValue: boolean): void {
         this.filteredInputsMulti
             .pipe(take(1), takeUntil(this._onDestroy))
             .subscribe(() => {
                 if (selectAllValue) {
                     this.inputMultiCtrl.patchValue([
-                        ...this.inputService.inputs.value
+                        ...this.obsService.inputs$.value
                     ]);
                     this.checkBoxChecked = true;
                 } else {
@@ -119,7 +121,7 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
     /**
      * Sets the initial value after the filtered inputs are loaded initially
      */
-    protected setInitialValue (): void {
+    protected setInitialValue(): void {
         this.filteredInputsMulti
             .pipe(take(1), takeUntil(this._onDestroy))
             .subscribe(() => {
@@ -128,8 +130,8 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
             });
     }
 
-    protected filterInputsMulti (): void {
-        const inputs = this.inputService.inputs.value;
+    protected filterInputsMulti(): void {
+        const inputs = this.obsService.inputs$.value;
         if (!inputs.length) {
             return;
         }
@@ -142,7 +144,7 @@ export class MultiSelectComponent implements OnInit, AfterViewInit {
             search = search.toLowerCase();
         }
 
-        const filteredInputs = inputs.filter(input =>
+        const filteredInputs = inputs.filter((input) =>
             input.name.toLowerCase().includes(search)
         );
 

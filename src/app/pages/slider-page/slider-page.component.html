@@ -1,21 +1,18 @@
-<div class="container">
-    <button (click)="goToPreviousPage()" [disabled]="currentPage === 0">
-        Previous
-    </button>
+<div class="full-window">
     <div
-        class="page"
+        class="page container"
         cdkDropList
         cdkDropListOrientation="mixed"
         (cdkDropListDropped)="drop($event)"
     >
         @for (slider of getItemsForCurrentPage(); track slider.uuid) {
-        <div class="slider" cdkDrag>
-            <slider-card
+        
+            <slider-card cdkDrag class="slider"
                 [slider]="slider"
                 (remove)="removeOption(slider.uuid)"
                 (newVolume)="changeVolume(slider.uuid, $event)"
             ></slider-card>
-        </div>
+            <!-- <div class="slider" cdkDrag></div> -->
         }
     </div>
     <button

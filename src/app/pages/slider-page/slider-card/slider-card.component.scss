@@ -1,6 +1,10 @@
 mat-card {
     position: relative;
     padding: 20px;
+    max-width: 600px;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 
     .slider-option {
         position: absolute;
@@ -22,5 +26,52 @@ mat-card {
 }
 
 #stage {
-    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    height: 20px;
+}
+
+@media (max-width: 768px) {
+}
+
+.centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 2xl */
+@media (max-width: 1536px) {
+}
+
+/* xl */
+@media (max-width: 1280px) {
+}
+
+/* lg */
+@media (max-width: 1024px) {
+}
+
+/* md */
+@media (max-width: 768px) {
+    .slider-option {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        top: 5px;
+        right: 5px;
+    }
+
+    .grab {
+        display: flex;
+        justify-content: center;
+        width: 3rem;
+    }
+}
+
+/* sm */
+@media (max-width: 640px) {
+}
+
+/* xs */
+@media (max-width: 475px) {
 }

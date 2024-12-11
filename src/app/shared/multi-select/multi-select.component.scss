@@ -3,3 +3,11 @@
         width: 30rem;
     }
 }
+
+@media (max-width: 768px) {
+    .multi-select {
+        mat-form-field {
+            width: 18rem;
+        }
+    }
+}

@@ -1,20 +1,16 @@
-<h1 mat-dialog-title>Connect to Local Server</h1>
+<h1 mat-dialog-title>Connect to Local OBS Websocket</h1>
 <div mat-dialog-content>
     <div class="p-2">
-        <p>
-            It doesn't look like you're connected to a server. Enter your server
-            details below!
-        </p>
 
         <!-- Bind the form to the FormGroup -->
         <form [formGroup]="connectionForm">
             <!-- Server Address Input -->
             <mat-form-field appearance="outline" class="full-width pt-2">
-                <mat-label>Server Address</mat-label>
+                <mat-label>OBS Websocket Address</mat-label>
                 <input
                     matInput
                     formControlName="serverAddress"
-                    placeholder="http://localhost"
+                    placeholder="192.168.1.1"
                 />
             </mat-form-field>
 
@@ -25,7 +21,7 @@
                     matInput
                     type="number"
                     formControlName="port"
-                    placeholder="3000"
+                    placeholder="4455"
                 />
             </mat-form-field>
 
@@ -46,11 +42,14 @@
                 <mat-panel-title>Need help?</mat-panel-title>
             </mat-expansion-panel-header>
             <p>
-                The server is the app that is running locally on the PC where
-                OBS is installed.
+                Obs Websocket is built into OBS in 2022 and all connection details can
+                be found within the obs app. Here are instructions on accessing those details:  
+                <a href="../../../assets/pdfs/" download="OBS-WebSocket-Help.pdf">
+                    Download Help PDF
+                </a>
             </p>
             <p>
-                If you are unsure what this means, feel free to shoot me an
+                If you are have any questions, feel free to shoot me an
                 email at
                 <a href="mailto:henley.austin@gmail.com"
                     >henley.austin&#64;gmail.com</a

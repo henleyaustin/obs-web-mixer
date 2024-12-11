@@ -30,8 +30,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
         MatSliderModule,
         MatButtonModule,
         MatIconModule,
-        CdkDropList,
-        CdkDrag,
         CdkDragPlaceholder,
         MatCardModule,
         CdkDragHandle,
@@ -55,31 +53,31 @@ export class SliderCardComponent implements OnInit, AfterViewInit, OnDestroy {
     barCount: number = 30;
     currentMeter: number = 0; // Keep track of the current volume animation
 
-    ngOnInit (): void {
+    ngOnInit(): void {
         this.volume = this.slider?.volume;
 
         // Debounced volume change event
-        this.volumeChange$.pipe(debounceTime(100)).subscribe(volume => {
+        this.volumeChange$.pipe(debounceTime(100)).subscribe((volume) => {
             this.newVolume.emit(volume);
         });
     }
 
-    ngAfterViewInit (): void {
+    ngAfterViewInit(): void {
         this.drawMeter();
     }
 
-    onRemove (): void {
+    onRemove(): void {
         this.remove.emit(this.slider.uuid);
     }
 
-    changeVolume (event: any): void {
+    changeVolume(event: any): void {
         this.volumeChange$.next(event);
     }
 
-    drawMeter (): void {
-        const ratio = window.devicePixelRatio || 1; // Get the pixel ratio for high-DPI screens
+    drawMeter(): void {
+        const ratio = window.devicePixelRatio || 1;
         const canvas = this.stage.nativeElement;
-        const parentElement = canvas.parentElement; // Get the parent element of the canvas
+        const parentElement = canvas.parentElement;
         const context = canvas.getContext('2d');
 
         if (parentElement && context) {
@@ -150,7 +148,7 @@ export class SliderCardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Utility function to calculate the color and lightness of each bar
-    getBoxColor (
+    getBoxColor(
         i: number,
         meter: number
     ): { color: string; lightness: number } {
@@ -162,7 +160,7 @@ export class SliderCardComponent implements OnInit, AfterViewInit, OnDestroy {
             h = 0; // Red color
         }
 
-        let l = 13; // Default lightness
+        let l = 25; // Default lightness
         if ((i / this.barCount) * 100 < meter) {
             l = 50; // Lighten the bars that are below the current meter value
         }
@@ -171,7 +169,7 @@ export class SliderCardComponent implements OnInit, AfterViewInit, OnDestroy {
         return { color, lightness: l }; // Return both color and lightness
     }
 
-    ngOnDestroy (): void {
+    ngOnDestroy(): void {
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId); // Stop the animation when the component is destroyed
         }

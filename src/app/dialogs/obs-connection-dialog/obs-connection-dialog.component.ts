@@ -18,7 +18,7 @@ export interface connectionDetails {
     password: string;
 }
 @Component({
-    selector: 'app-server-connection-dialog',
+    selector: 'app-obs-connection-dialog',
     standalone: true,
     imports: [
         MatDialogModule,
@@ -29,10 +29,10 @@ export interface connectionDetails {
         ReactiveFormsModule,
         MatTooltipModule
     ],
-    templateUrl: './server-connection-dialog.component.html',
-    styleUrl: './server-connection-dialog.component.scss'
+    templateUrl: './obs-connection-dialog.component.html',
+    styleUrl: './obs-connection-dialog.component.scss'
 })
-export class ServerConnectionDialogComponent {
+export class OBSConnectionDialogComponent {
     connectionForm = new FormGroup({
         serverAddress: new FormControl('', [Validators.required]),
         port: new FormControl('', [
@@ -42,13 +42,13 @@ export class ServerConnectionDialogComponent {
         ]),
         password: new FormControl('') // Optional password field
     });
-    constructor (
-        private dialogRef: MatDialogRef<ServerConnectionDialogComponent>
+    constructor(
+        private dialogRef: MatDialogRef<OBSConnectionDialogComponent>
     ) {}
 
     // Method to submit the form
     // Close the dialog and pass the form values if the form is valid
-    submit (): void {
+    submit(): void {
         if (this.connectionForm.valid) {
             this.dialogRef.close(this.connectionForm.value); // Pass form values as an object
         }

@@ -5,7 +5,7 @@ import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 @Injectable({
     providedIn: 'root'
 })
-export class SocketConnectionService {
+export class OBSConnectionService {
     private obs: OBSWebSocket;
 
     private connectionStatus = new BehaviorSubject<boolean>(false); // Connection status
@@ -14,14 +14,14 @@ export class SocketConnectionService {
     private activeInputs = new BehaviorSubject<any>(null); // Connection status
     public activeInputs$ = this.activeInputs.asObservable(); // Observable for connection status
 
-    constructor () {
+    constructor() {
         this.obs = new OBSWebSocket();
         this.checkConnection();
         this.listenToInputVolumeMeters();
     }
 
     // Connect to OBS WebSocket
-    async connect (
+    async connect(
         url: string,
         password: string = 'Rwqwb1AgBpao7ZjC'
     ): Promise<void> {
@@ -37,7 +37,7 @@ export class SocketConnectionService {
     }
 
     // Disconnect from OBS WebSocket
-    disconnect (): void {
+    disconnect(): void {
         if (this.obs) {
             this.obs.disconnect();
             this.connectionStatus.next(false);
@@ -45,7 +45,7 @@ export class SocketConnectionService {
     }
 
     // Fetch inputs from OBS WebSocket
-    async fetchInputs (): Promise<any[]> {
+    async fetchInputs(): Promise<any[]> {
         try {
             const response = await this.obs.call('GetInputList');
             return response.inputs;
@@ -55,7 +55,7 @@ export class SocketConnectionService {
     }
 
     // Fetch input volume
-    async getVolume (uuid: string): Promise<any> {
+    async getVolume(uuid: string): Promise<any> {
         try {
             const volumeResponse = await this.obs.call('GetInputVolume', {
                 inputUuid: uuid
@@ -66,7 +66,7 @@ export class SocketConnectionService {
         }
     }
 
-    private listenToInputVolumeMeters (): void {
+    private listenToInputVolumeMeters(): void {
         this.obs.on('InputVolumeMeters', (data: any) => {
             const activeInputs = data.inputs;
             this.activeInputs.next(activeInputs);
@@ -74,7 +74,7 @@ export class SocketConnectionService {
     }
 
     // Update input volume
-    async updateVolume (uuid: string, volume: number): Promise<void> {
+    async updateVolume(uuid: string, volume: number): Promise<void> {
         try {
             await this.obs.call('SetInputVolume', {
                 inputUuid: uuid,
@@ -86,7 +86,7 @@ export class SocketConnectionService {
     }
 
     // Listen for connection events
-    private checkConnection (): void {
+    private checkConnection(): void {
         this.obs.on('ConnectionOpened', () => {
             this.connectionStatus.next(true);
         });

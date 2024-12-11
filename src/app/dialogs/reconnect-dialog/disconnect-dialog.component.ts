@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-    selector: 'app-server-connection-dialog',
+    selector: 'app-disconnect-dialog',
     standalone: true,
     imports: [
         MatDialogModule,
@@ -19,9 +19,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         ReactiveFormsModule,
         MatTooltipModule
     ],
-    templateUrl: './server-connection-dialog.component.html',
-    styleUrl: './server-connection-dialog.component.scss'
+    templateUrl: './disconnect-dialog.component.html',
+    styleUrl: './disconnect-dialog.component.scss'
 })
-export class OBSConnectionDialog {
-    constructor (private dialogRef: MatDialogRef<OBSConnectionDialog>) {}
+export class DisconnectDialogComponent {
+    constructor(private dialogRef: MatDialogRef<DisconnectDialogComponent>) {}
 }
