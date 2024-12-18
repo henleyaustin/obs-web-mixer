@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
+import { Socket, SocketIoConfig } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs';
 import { AudioInput } from '../../_models/AudioInput';
 import { DisconnectDialogComponent } from '../dialogs/reconnect-dialog/disconnect-dialog.component';
@@ -10,7 +10,14 @@ import { OBSConnectionDialogComponent } from '../dialogs/obs-connection-dialog/o
     providedIn: 'root'
 })
 export class OBSService {
-    private obs: OBSWebSocket;
+    config: SocketIoConfig = {
+        url: '',
+        options: {
+            transports: ['websocket'],
+            autoConnect: false
+        }
+    };
+
     private serverKey = 'SERVER_IP';
     private serverAddress = '';
     private wasConnected = false;
@@ -19,8 +26,8 @@ export class OBSService {
     public inputs$ = new BehaviorSubject<AudioInput[]>([]);
     public selectedInputs$ = new BehaviorSubject<AudioInput[]>([]);
 
-    constructor(private dialog: MatDialog) {
-        this.obs = new OBSWebSocket();
+    constructor(private socket: Socket, private dialog: MatDialog) {
+        this.setupSocketListeners();
         this.setupConnectionListeners();
     }
 
@@ -35,101 +42,130 @@ export class OBSService {
         }
     }
 
-    // Connect to OBS WebSocket
-    async connect(
-        url: string,
-        password: string = 'Rwqwb1AgBpao7ZjC'
-    ): Promise<void> {
-        const connectionTimeout = 5000; // 5 seconds
-        try {
-            await Promise.race([
-                this.obs.connect(url, password, {
-                    eventSubscriptions: EventSubscription.InputVolumeMeters
-                }),
-                new Promise((_, reject) =>
-                    setTimeout(
-                        () => reject(new Error('Connection Timeout')),
-                        connectionTimeout
-                    )
-                )
-            ]);
-            console.log('Connected to OBS');
+    // Connect to the relay server
+    connect(url: string): void {
+        // Disconnect existing connection
+        this.socket.disconnect();
+
+        this.config.url = url;
+        this.socket = new Socket(this.config);
+
+        // Reconnect
+        this.socket.connect();
+        this.setupSocketListeners();
+
+        this.serverAddress = url;
+        sessionStorage.setItem(this.serverKey, url);
+    }
+
+    // Setup socket event listeners
+    private setupSocketListeners(): void {
+        // Connection established
+        this.socket.fromEvent('connect').subscribe(() => {
+            console.log('Connected to relay server');
             this.connectionStatus$.next(true);
-            sessionStorage.setItem(this.serverKey, url);
             this.wasConnected = true;
             this.listenForVolume();
-            await this.fetchInputs(); // Fetch inputs after connection
-        } catch (error) {
+            this.fetchInputs();
+        });
+
+        // Connection error
+        this.socket.fromEvent('connect_error').subscribe((error) => {
+            console.error('Socket connection error:', error);
             this.connectionStatus$.next(false);
-            console.error('Error connecting to OBS:', error);
-            if (this.wasConnected) {
-                this.openDisconnectDialog();
-            } else {
-                this.openConnectionDialog();
-            }
+            if (this.wasConnected) this.openDisconnectDialog();
+            else this.openConnectionDialog();
+        });
+
+        // Disconnection
+        this.socket.fromEvent('disconnect').subscribe((reason) => {
+            console.log('Disconnected from relay server:', reason);
+            this.connectionStatus$.next(false);
+            this.removeAddress();
+            if (this.wasConnected) this.openDisconnectDialog();
+        });
+
+        // OBS responses
+        this.socket
+            .fromEvent('obs-response')
+            .subscribe((data: any) => this.handleMessage(data));
+
+        // OBS errors
+        this.socket.fromEvent('obs-error').subscribe((error) => {
+            console.error('OBS Error:', error);
+        });
+    }
+
+    // Send message to relay server
+    private sendMessage(message: any): void {
+        if (this.socket.ioSocket.connected) {
+            this.socket.emit('obs-message', message);
+        } else {
+            console.error('Socket is not connected.');
         }
     }
 
-    // Disconnect
-    disconnect(): void {
-        if (this.obs) {
-            this.obs.disconnect();
-            this.connectionStatus$.next(false);
+    // Handle messages from relay server
+    private handleMessage(data: any): void {
+        if (data.requestType === 'GetInputList') {
+            this.handleFetchInputsResponse(data.response.inputs);
+        } else if (data.requestType === 'SetInputVolume') {
+            console.log('Volume updated successfully');
+        } else if (data.event === 'InputVolumeMeters') {
+            this.handleVolumeMeters(data.inputs);
+        } else if (data.event === 'error') {
+            console.error('Error from relay:', data.message);
         }
     }
 
     // Fetch inputs
-    async fetchInputs(): Promise<void> {
-        try {
-            const response = await this.obs.call('GetInputList');
-            const inputs = await this.mapInputsWithVolumes(response.inputs);
-            // Initialize inputs with default meter value (0)
-            const enrichedInputs = inputs.map((input) => ({
-                ...input,
-                meter: 0
-            }));
-            this.inputs$.next(enrichedInputs);
-        } catch (error) {
-            console.error('Error fetching inputs:', error);
-        }
+    fetchInputs(): void {
+        this.sendMessage({ requestType: 'GetInputList', payload: {} });
+    }
+
+    private handleFetchInputsResponse(inputs: any[]): void {
+        const enrichedInputs = inputs.map((input) => ({
+            inputKind: input.inputKind,
+            name: input.inputName,
+            uuid: input.inputUuid,
+            volume: input.volume || 0,
+            meter: 0
+        }));
+        this.inputs$.next(enrichedInputs);
     }
 
     // Update input volume
-    async updateVolume(uuid: string, volume: number): Promise<void> {
-        try {
-            await this.obs.call('SetInputVolume', {
-                inputUuid: uuid,
-                inputVolumeMul: volume / 100
-            });
-            const updatedInputs = this.inputs$.value.map((input) =>
-                input.uuid === uuid ? { ...input, volume } : input
-            );
-            this.inputs$.next(updatedInputs);
-        } catch (error) {
-            console.error('Error updating volume:', error);
-        }
+    updateVolume(uuid: string, volume: number): void {
+        this.sendMessage({
+            requestType: 'SetInputVolume',
+            payload: { inputUuid: uuid, inputVolumeMul: volume / 100 }
+        });
+
+        const updatedInputs = this.inputs$.value.map((input) =>
+            input.uuid === uuid ? { ...input, volume } : input
+        );
+        this.inputs$.next(updatedInputs);
     }
 
-    // Map inputs with volumes
-    private async mapInputsWithVolumes(inputs: any[]): Promise<AudioInput[]> {
-        const promises = inputs.map(async (input) => {
-            try {
-                const volumeResponse = await this.obs.call('GetInputVolume', {
-                    inputUuid: input.inputUuid
-                });
-                return {
-                    inputKind: input.inputKind,
-                    name: input.inputName,
-                    uuid: input.inputUuid,
-                    volume: volumeResponse.inputVolumeMul * 100
-                } as AudioInput;
-            } catch {
-                console.warn(`Could not fetch volume for ${input.inputName}`);
-                return null;
+    // Listen for real-time volume updates
+    private listenForVolume(): void {
+        console.log('Listening for volume updates...');
+    }
+
+    private handleVolumeMeters(activeInputs: any[]): void {
+        const updatedInputs = this.inputs$.value.map((input) => {
+            const activeInput = activeInputs.find(
+                (active: any) => active.inputUuid === input.uuid
+            );
+            if (activeInput) {
+                const averageMeterLevel = this.averageLevel(
+                    activeInput.inputLevelsMul
+                );
+                return { ...input, meter: averageMeterLevel * 100 }; // Normalize to 0-100
             }
+            return { ...input, meter: 0 }; // Reset if inactive
         });
-        const result = await Promise.all(promises);
-        return result.filter((input): input is AudioInput => input !== null);
+        this.inputs$.next(updatedInputs);
     }
 
     // Add or remove selected inputs
@@ -143,39 +179,6 @@ export class OBSService {
         );
     }
 
-    // Listen to real-time volume updates and merge with inputs
-    private setupConnectionListeners(): void {
-        this.obs.on('ConnectionOpened', () => {
-            this.connectionStatus$.next(true);
-        });
-
-        this.obs.on('ConnectionClosed', () => {
-            this.connectionStatus$.next(false);
-            if (this.wasConnected) {
-                this.openDisconnectDialog();
-            }
-        });
-    }
-
-    private listenForVolume() {
-        this.obs.on('InputVolumeMeters', (data: any) => {
-            const activeInputs = data.inputs || [];
-            const updatedInputs = this.inputs$.value.map((input) => {
-                const activeInput = activeInputs.find(
-                    (active: any) => active.inputUuid === input.uuid
-                );
-                if (activeInput) {
-                    const averageMeterLevel = this.averageLevel(
-                        activeInput.inputLevelsMul
-                    );
-                    return { ...input, meter: averageMeterLevel * 100 }; // Normalize to 0-100
-                }
-                return { ...input, meter: 0 }; // Reset meter if not active
-            });
-            this.inputs$.next(updatedInputs);
-        });
-    }
-
     // Open connection dialog
     private openConnectionDialog(): void {
         const dialogRef = this.dialog.open(OBSConnectionDialogComponent, {
@@ -183,10 +186,9 @@ export class OBSService {
         });
         dialogRef.afterClosed().subscribe((details) => {
             if (details) {
-                const { serverAddress, port, password } = details;
-                if (serverAddress && port) {
-                    this.serverAddress = `ws://${serverAddress}:${port}`;
-                    this.connect(this.serverAddress, password);
+                const { serverAddress } = details;
+                if (serverAddress) {
+                    this.connect(serverAddress);
                 }
             }
         });
@@ -196,17 +198,41 @@ export class OBSService {
     private openDisconnectDialog(): void {
         const dialogRef = this.dialog.open(DisconnectDialogComponent, {
             width: '300px',
-            data: {
-                message:
-                    'The connection has been lost. Please try to reconnect.'
-            }
+            data: { message: 'The connection has been lost. Please reconnect.' }
         });
-        // dialogRef.afterClosed().subscribe(() => this.openConnectionDialog());
+        dialogRef.afterClosed().subscribe((details) => {
+            this.removeAddress();
+            this.openConnectionDialog();
+        });
     }
 
-    // Helper function to calculate the average volume level from channels
+    // Average volume helper
     private averageLevel(levels: number[]): number {
         if (!levels || levels.length === 0) return 0;
         return levels.reduce((sum, level) => sum + level, 0) / levels.length;
+    }
+
+    // Setup connection listeners for network changes
+    private setupConnectionListeners(): void {
+        window.addEventListener('offline', () => {
+            console.warn('Network connection lost');
+            this.connectionStatus$.next(false);
+            this.socket.disconnect();
+        });
+
+        window.addEventListener('online', () => {
+            console.log('Network connection restored');
+            if (this.serverAddress) this.connect(this.serverAddress);
+        });
+    }
+
+    private setAddress(address: string): void {
+        this.serverAddress = address;
+        sessionStorage.setItem(this.serverKey, address);
+    }
+
+    private removeAddress(): void {
+        this.serverAddress = '';
+        sessionStorage.removeItem(this.serverKey);
     }
 }

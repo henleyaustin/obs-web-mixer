@@ -34,13 +34,7 @@ export interface connectionDetails {
 })
 export class OBSConnectionDialogComponent {
     connectionForm = new FormGroup({
-        serverAddress: new FormControl('', [Validators.required]),
-        port: new FormControl('', [
-            Validators.required,
-            Validators.min(1),
-            Validators.max(65535)
-        ]),
-        password: new FormControl('') // Optional password field
+        serverAddress: new FormControl('', [Validators.required])
     });
     constructor(
         private dialogRef: MatDialogRef<OBSConnectionDialogComponent>
@@ -50,7 +44,7 @@ export class OBSConnectionDialogComponent {
     // Close the dialog and pass the form values if the form is valid
     submit(): void {
         if (this.connectionForm.valid) {
-            this.dialogRef.close(this.connectionForm.value); // Pass form values as an object
+            this.dialogRef.close(this.connectionForm.value);
         }
     }
 }

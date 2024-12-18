@@ -12,7 +12,6 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ReplaySubject, Subject, takeUntil, take } from 'rxjs';
 import { AudioInput } from '../../../_models/AudioInput';
 import { AsyncPipe } from '@angular/common';
-import { AudioInputsService } from '../../services/audio-inputs.service';
 import { StorageService } from '../../services/storage.service';
 import { OBSService } from '../../services/obs.service';
 

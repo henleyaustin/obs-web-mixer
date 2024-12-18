@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Connect to Local OBS Websocket</h1>
+<h1 mat-dialog-title>Connect to OBS Web Mixer Server</h1>
 <div mat-dialog-content>
     <div class="p-2">
 
@@ -6,33 +6,11 @@
         <form [formGroup]="connectionForm">
             <!-- Server Address Input -->
             <mat-form-field appearance="outline" class="full-width pt-2">
-                <mat-label>OBS Websocket Address</mat-label>
+                <mat-label>Server Address</mat-label>
                 <input
                     matInput
                     formControlName="serverAddress"
-                    placeholder="192.168.1.1"
-                />
-            </mat-form-field>
-
-            <!-- Port Number Input -->
-            <mat-form-field appearance="outline" class="full-width pt-2">
-                <mat-label>Port Number</mat-label>
-                <input
-                    matInput
-                    type="number"
-                    formControlName="port"
-                    placeholder="4455"
-                />
-            </mat-form-field>
-
-            <!-- Password Input -->
-            <mat-form-field appearance="outline" class="full-width pt-2">
-                <mat-label>Password</mat-label>
-                <input
-                    matInput
-                    type="password"
-                    formControlName="password"
-                    placeholder="Enter your password"
+                    placeholder="Address ending in ngrok-free.app"
                 />
             </mat-form-field>
         </form>
@@ -42,11 +20,7 @@
                 <mat-panel-title>Need help?</mat-panel-title>
             </mat-expansion-panel-header>
             <p>
-                Obs Websocket is built into OBS in 2022 and all connection details can
-                be found within the obs app. Here are instructions on accessing those details:  
-                <a href="../../../assets/pdfs/" download="OBS-WebSocket-Help.pdf">
-                    Download Help PDF
-                </a>
+                
             </p>
             <p>
                 If you are have any questions, feel free to shoot me an

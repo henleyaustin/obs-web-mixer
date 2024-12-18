@@ -5,11 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
-import { AudioInputsService } from './services/audio-inputs.service';
 import { Subscription } from 'rxjs';
 import { SliderPageComponent } from './pages/slider-page/slider-page.component';
-import { WebSocketMonitorService } from './services/websocket-monitor.service';
-import { OBSConnectionService } from './services/socket-connection.service';
 import { ThemeService } from './services/theme.service';
 import { OBSService } from './services/obs.service';
 
